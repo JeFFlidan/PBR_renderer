@@ -1,4 +1,4 @@
+*.exe
 /models
 /textures
 /.vscode
-main.exe
