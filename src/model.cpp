@@ -1,20 +1,15 @@
-#include <vector>
-#include <string>
 #include <sstream>
 #include <fstream>
 #include <thread>
 #include <mutex>
+#include <stdexcept>
 
 #include <glad/glad.h>
-#include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <assimp/Importer.hpp>
-#include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "shader.hpp"
-#include "import/mesh.hpp"
 #include "import/model.hpp"
 
 namespace rnd
@@ -28,13 +23,10 @@ namespace rnd
 	void Model::loadModel(std::string path)
 	{
 		Assimp::Importer import;
-		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);		// Read file and add it in the Assimp scene node. The second parametr is some post-processing fichers
+		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_OptimizeGraph);		// Read file and add it in the Assimp scene node. The second parametr is some post-processing fichers
 
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-		{
-			std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
-			return;
-		}
+			throw std::runtime_error(import.GetErrorString());
 
 		directory = path.substr(0, path.find_last_of('/'));
 		processNode(scene->mRootNode, scene);

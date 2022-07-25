@@ -5,21 +5,24 @@
 #include "texture.hpp"
 #include "import/model.hpp"
 
-struct TexturesPBR
+namespace rnd
 {
-	public:
-		TexturesPBR(rnd::Texture* baseColor);
-		void bindTextures();
-	private:
-		std::vector<rnd::Texture*> textures;
-};
+	class TexturesPBR
+	{
+		public:
+			TexturesPBR(rnd::Texture* baseColor);
+			void bindTextures();
+		private:
+			std::vector<rnd::Texture*> textures;
+	};
 
-struct Model
-{
-	public:
-		Model(const std::string& modelPath, TexturesPBR* textures);
-		void draw();
-	private:
-		rnd::Model model;
-		TexturesPBR* textures;
+	class ModelWithTextures
+	{
+		public:
+			ModelWithTextures(const std::string& modelPath, TexturesPBR* textures);
+			void draw();
+		private:
+			rnd::Model model;
+			TexturesPBR* textures;
+	};
 };

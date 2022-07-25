@@ -1,11 +1,8 @@
-#include <string>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
 
-#include <glad/glad.h>
-#include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "shader.hpp"

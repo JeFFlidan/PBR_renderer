@@ -1,17 +1,4 @@
-#include <vector>
-#include <string>
-#include <stdexcept>
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include "camera.hpp"
-#include "shader.hpp"
-#include "texture.hpp"
-#include "setup_model.hpp"
+#include "includes.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image/stb_image.h>
@@ -32,6 +19,8 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+const int ssaaLevel = 8;
+
 int main()
 {
 	glfwInit();
@@ -51,32 +40,43 @@ int main()
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		throw std::runtime_error("failed to inititalize GLAD");
 
-	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 	glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 	glfwSetCursorPosCallback(window, cursorCallback);
 	glfwSetScrollCallback(window, scrollCallback);
 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
 
 	uint32_t textures;
 	glGenTextures(1, &textures);
 	rnd::Texture baseColor(&textures, GL_TEXTURE0, GL_TEXTURE_2D, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_NEAREST);
 	baseColor.setupImage("E:/PBR_render/textures/gun/Gun_BaseColor.tga", GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
-	TexturesPBR modelTextures(&baseColor);
+	rnd::TexturesPBR modelTextures(&baseColor);
 
-	std::vector<Model> models;
-	models.push_back(Model("E:/PBR_render/models/SM_Gun_1.fbx", &modelTextures));
+	std::vector<rnd::ModelWithTextures> models;
+	models.push_back(rnd::ModelWithTextures("E:/PBR_render/models/SM_Gun_1.fbx", &modelTextures));
 	
 	rnd::Shader modelShader("E:/PBR_render/shaders/modelShader/model.vert", "E:/PBR_render/shaders/modelShader/model.frag");
 
 	glm::mat4 model = glm::mat4(1.0f);
 	glm::mat4 projection = glm::perspective(glm::radians(60.0f), SCR_WIDTH / SCR_HEIGHT, 0.1f, 1000.0f);
-	modelShader.setInt("material.baseColor", 0);
 
 	modelShader.use();
+	modelShader.setInt("material.baseColor", 0);
 	modelShader.setMat4("model", model);
 	modelShader.setMat4("projection", projection);
+
+	float ssaaResolution[2] = { SCR_WIDTH * ssaaLevel, SCR_HEIGHT * ssaaLevel };
+
+	rnd::RenderSSAA ssaaRender(ssaaResolution);
+	rnd::OutputQuad outputQuad;
+
+	rnd::Shader shaderSSAA("E:/PBR_render/shaders/SSAA/SSAA.vert", "E:/PBR_render/shaders/SSAA/SSAA.frag");
+	shaderSSAA.use();
+	shaderSSAA.setVec2f("resolution", ssaaResolution[0], ssaaResolution[1]);
+	shaderSSAA.setInt("ssaaLevel", ssaaLevel);
+	shaderSSAA.setInt("renderTexture", 0);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -85,16 +85,21 @@ int main()
 		lastFrame = currentTime;
 
 		processInput(window);
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glEnable(GL_CULL_FACE);
 
 		modelShader.use();
-		glBindTexture(GL_TEXTURE_2D, baseColor.textureObj());
 		modelShader.setMat4("view", camera.GetViewMatrix());
+		ssaaRender.render(models);
 
-		for (auto& model : models)
-			model.draw();
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDisable(GL_CULL_FACE);
 
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		shaderSSAA.use();
+		outputQuad.render(ssaaRender.fboColor());
+		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
