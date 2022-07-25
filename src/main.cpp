@@ -11,7 +11,7 @@
 #include "camera.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
-#include "import/model.hpp"
+#include "setup_model.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image/stb_image.h>
@@ -59,12 +59,14 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
-	rnd::Model gun("E:/PBR_render/models/SM_Gun_1.fbx");
- 
 	uint32_t textures;
 	glGenTextures(1, &textures);
-	rnd::Texture baseColor(&textures, GL_TEXTURE0, GL_TEXTURE_2D, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR_MIPMAP_LINEAR);
+	rnd::Texture baseColor(&textures, GL_TEXTURE0, GL_TEXTURE_2D, GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_NEAREST);
 	baseColor.setupImage("E:/PBR_render/textures/gun/Gun_BaseColor.tga", GL_RGB, GL_RGB, GL_UNSIGNED_BYTE);
+	TexturesPBR modelTextures(&baseColor);
+
+	std::vector<Model> models;
+	models.push_back(Model("E:/PBR_render/models/SM_Gun_1.fbx", &modelTextures));
 	
 	rnd::Shader modelShader("E:/PBR_render/shaders/modelShader/model.vert", "E:/PBR_render/shaders/modelShader/model.frag");
 
@@ -87,10 +89,11 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		modelShader.use();
-		glBindTexture(GL_TEXTURE_2D, modelShader.ID);
+		glBindTexture(GL_TEXTURE_2D, baseColor.textureObj());
 		modelShader.setMat4("view", camera.GetViewMatrix());
 
-		gun.Draw(modelShader);
+		for (auto& model : models)
+			model.draw();
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

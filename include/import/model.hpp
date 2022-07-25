@@ -16,11 +16,13 @@ namespace rnd
 	class Model
 	{
 		public:
+			Model() = default;
+			
 			Model(const std::string& path)
 			{
 				loadModel(path);
 			}
-			void Draw(Shader& shader);
+			void Draw();
 
 			std::vector<Mesh> meshes;
 		private:

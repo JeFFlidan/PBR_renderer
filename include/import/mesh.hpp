@@ -27,7 +27,7 @@ namespace rnd
 			
 			Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices);
 
-			void Draw(Shader& shader);
+			void Draw();
 			unsigned int VAO, VBO, EBO;
 		private:
 			void setupMesh();

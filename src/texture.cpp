@@ -11,28 +11,29 @@ namespace rnd
 {
 	Texture::Texture(uint32_t* text, GLenum textSet, GLenum txType, GLint sWrap, GLint tWrap, GLint minFilt, GLint magFilt)
 	{
-		textureObject = text;
-		textureSet = textSet;
-		textureType = txType;
+		textObject = text;
+		textSet = textSet;
+		textType = txType;
 
-		glActiveTexture(textureSet);
-		glBindTexture(textureType, *textureObject);
-		glTexParameteri(textureType, GL_TEXTURE_WRAP_S, sWrap);
-		glTexParameteri(textureType, GL_TEXTURE_WRAP_T, tWrap);
-		glTexParameteri(textureType, GL_TEXTURE_MIN_FILTER, minFilt);
-		glTexParameteri(textureType, GL_TEXTURE_MAG_FILTER, magFilt);
+		glActiveTexture(textSet);
+		glBindTexture(textType, *textObject);
+		glTexParameteri(textType, GL_TEXTURE_WRAP_S, sWrap);
+		glTexParameteri(textType, GL_TEXTURE_WRAP_T, tWrap);
+		glTexParameteri(textType, GL_TEXTURE_MIN_FILTER, minFilt);
+		glTexParameteri(textType, GL_TEXTURE_MAG_FILTER, magFilt);
+		glBindTexture(textType, 0);
 	}
 
 	void Texture::setupImage(const std::string& imageName, GLint txtColorFormat, GLint newColorFormat, GLint dataType)
 	{
-		glBindTexture(textureType, *textureObject);
+		glBindTexture(textType, *textObject);
 
 		int width, height, nrChannel;
 		unsigned char* data = stbi_load(imageName.c_str(), &width, &height, &nrChannel, 0);
 		if (data)
 		{
-			glTexImage2D(textureType, 0, txtColorFormat, width, height, 0, newColorFormat, dataType, data);
-			glGenerateMipmap(textureType);
+			glTexImage2D(textType, 0, txtColorFormat, width, height, 0, newColorFormat, dataType, data);
+			glGenerateMipmap(textType);
 		}
 		else
 		{
@@ -40,5 +41,7 @@ namespace rnd
 		}
 
 		stbi_image_free(data);
+
+		glBindTexture(textType, 0);
 	}
 }
