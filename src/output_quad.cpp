@@ -3,7 +3,7 @@
 
 namespace rnd
 {
-	OutputQuad::OutputQuad()
+	void OutputQuad::init()
 	{
 		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);

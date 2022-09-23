@@ -1,8 +1,10 @@
 #pragma once
 
+#include <iostream>
 #include <vector>
 #include <string>
 #include <stdexcept>
+#include <unordered_map>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -16,3 +18,4 @@
 #include "setup_model.hpp"
 #include "renderSSAA.hpp"
 #include "output_quad.hpp"
+#include "shadow_maps.hpp"

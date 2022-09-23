@@ -7,21 +7,21 @@
 
 namespace rnd
 {
-	TexturesPBR::TexturesPBR(rnd::Texture* baseColor)
+	void TexturesPBR::addTexture(Texture texture)
 	{
-		textures.push_back(baseColor);
+		textures.push_back(texture);
 	}
 
 	void TexturesPBR::bindTextures()
 	{
-		for (auto texture : textures)
+		for (int i = 0; i != textures.size(); ++i)
 		{
-			glActiveTexture(texture->textureSet());
-			glBindTexture(texture->textureType(), texture->textureObj());
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(textures[i].textureType(), textures[i].textureObj());
 		}
 	}
 
-	ModelWithTextures::ModelWithTextures(const std::string& modelPath, TexturesPBR* textures)
+	ModelWithTextures::ModelWithTextures(const std::string& modelPath, TexturesPBR textures)
 	{
 		rnd::Model temp(modelPath);
 		model = temp;
@@ -30,7 +30,12 @@ namespace rnd
 
 	void ModelWithTextures::draw()
 	{
-		textures->bindTextures();
+		textures.bindTextures();
+		model.Draw();
+	}
+
+	void ModelWithTextures::drawInShadowPass()
+	{
 		model.Draw();
 	}
 };

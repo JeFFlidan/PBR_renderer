@@ -8,7 +8,8 @@ namespace rnd
 	class OutputQuad
 	{
 		public:
-			OutputQuad();
+			OutputQuad() = default;
+			void init();
 			void render(uint32_t texture);
 		private:
 			uint32_t VAO, VBO;

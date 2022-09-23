@@ -13,11 +13,9 @@ namespace rnd
 			// the program ID
 			uint32_t ID;
 
+			Shader() = default;
 			// constructor reads and builds the shader
 			Shader(const char* vertexPath, const char* fragmentPath);
-
-			Shader(const Shader&) = delete;
-			Shader& operator=(const Shader&) = delete;
 
 			//use/activate the shader
 			void use();

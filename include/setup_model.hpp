@@ -4,25 +4,36 @@
 
 #include "texture.hpp"
 #include "import/model.hpp"
+#include "shader.hpp"
 
 namespace rnd
 {
-	class TexturesPBR
+	struct TexturesPBR
 	{
 		public:
-			TexturesPBR(rnd::Texture* baseColor);
+			TexturesPBR() = default;
+			void addTexture(Texture texture);
 			void bindTextures();
 		private:
-			std::vector<rnd::Texture*> textures;
+			std::vector<rnd::Texture> textures;
 	};
 
-	class ModelWithTextures
+	struct ModelWithTextures
 	{
 		public:
-			ModelWithTextures(const std::string& modelPath, TexturesPBR* textures);
+			ModelWithTextures() = default;
+			ModelWithTextures(const std::string& modelPath, TexturesPBR textures);
 			void draw();
+			void drawInShadowPass();
 		private:
 			rnd::Model model;
-			TexturesPBR* textures;
+			TexturesPBR textures;
+	};
+
+	struct RenderableObject
+	{
+		rnd::ModelWithTextures* model;
+		glm::mat4 modelMatrix;
+		rnd::Shader* shader;
 	};
 };
